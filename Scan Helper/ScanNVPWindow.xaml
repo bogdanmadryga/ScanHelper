@@ -1,0 +1,173 @@
+﻿<Window x:Class="ScanHelper.ScanNVPWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="clr-namespace:ScanHelper.Models"
+        Title="Сканирование НВП"
+        Height="650"
+        Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#111214">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock x:Name="TitleText"
+                   Grid.Row="0"
+                   Text="Сканирование"
+                   Foreground="White"
+                   FontSize="34"
+                   FontWeight="Bold"
+                   Margin="0,0,0,12"/>
+
+        <!-- Итоги -->
+        <Border Grid.Row="1" Background="#23262B" CornerRadius="12" Padding="16" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="План: " Foreground="White" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="PlanText" Foreground="White" FontSize="18" Margin="0,0,24,0"/>
+
+                <TextBlock Text="Факт: " Foreground="White" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="ScannedText" Foreground="White" FontSize="18" Margin="0,0,24,0"/>
+
+                <TextBlock Text="Осталось: " Foreground="White" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="LeftText" Foreground="White" FontSize="18" Margin="0,0,24,0"/>
+
+                <TextBlock Text="Перебор: " Foreground="White" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="OverText" Foreground="White" FontSize="18"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Ввод + кнопки + таблица -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Ввод штрихкода -->
+            <Grid Grid.Row="0" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Background="#23262B" CornerRadius="12" Padding="10" Margin="0,0,12,0">
+                    <TextBox x:Name="BarcodeInput"
+                             FontSize="22"
+                             Padding="10"
+                             BorderThickness="0"
+                             Background="White"
+                             KeyDown="BarcodeInput_KeyDown"/>
+                </Border>
+
+                <Button Grid.Column="1"
+                        Content="Назад"
+                        Height="56"
+                        FontSize="18"
+                        Click="Back_Click"
+                        Background="#E0E0E0"/>
+            </Grid>
+
+            <!-- Таблица -->
+            <DataGrid x:Name="ItemsGrid"
+                      Grid.Row="1"
+                      AutoGenerateColumns="False"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="False"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      CellEditEnding="ItemsGrid_CellEditEnding"
+                      Background="#1A1B1E"
+                      RowBackground="#F2F2F2"
+                      AlternatingRowBackground="#ECECEC"
+                      GridLinesVisibility="All"
+                      BorderThickness="0"
+                      FontSize="16">
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+
+                        <!-- по умолчанию -->
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="FontWeight" Value="Normal"/>
+
+                        <Style.Triggers>
+
+                            <!-- Последний отсканированный: рамка + жирный (НЕ ломает цвет статуса) -->
+                            <DataTrigger Binding="{Binding IsLastScanned}" Value="True">
+                                <Setter Property="BorderBrush" Value="#FFF7D66B"/>
+                                <Setter Property="BorderThickness" Value="3"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </DataTrigger>
+
+                            <!-- Статусы -->
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static models:NvpRowStatus.Under}">
+                                <Setter Property="Background" Value="#FFFFB3B3"/>
+                                <!-- красный -->
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static models:NvpRowStatus.Match}">
+                                <Setter Property="Background" Value="#FFBFF5BF"/>
+                                <!-- зеленый -->
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static models:NvpRowStatus.Over}">
+                                <Setter Property="Background" Value="#FFB3E5FF"/>
+                                <!-- голубой -->
+                            </DataTrigger>
+
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Штрихкод"
+                                        Binding="{Binding Barcode}"
+                                        IsReadOnly="True"
+                                        Width="*"/>
+
+                    <DataGridTextColumn Header="План"
+                                        Binding="{Binding ExpectedCount}"
+                                        IsReadOnly="True"
+                                        Width="140"/>
+
+                    <!-- ФАКТ редактируем -->
+                    <DataGridTextColumn Header="Факт"
+                                        Width="140"
+                                        IsReadOnly="False">
+                        <DataGridTextColumn.Binding>
+                            <Binding Path="ScannedCount"
+                                     Mode="TwoWay"
+                                     UpdateSourceTrigger="PropertyChanged"/>
+                        </DataGridTextColumn.Binding>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Осталось"
+                                        Binding="{Binding Left}"
+                                        IsReadOnly="True"
+                                        Width="160"/>
+
+                    <DataGridTextColumn Header="Перебор"
+                                        Binding="{Binding Over}"
+                                        IsReadOnly="True"
+                                        Width="160"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>
+
+
+
+
+
+
+
+

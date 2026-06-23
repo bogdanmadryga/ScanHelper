@@ -1,0 +1,61 @@
+﻿<Window x:Class="ScanHelper.BarcodeHubWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Barcode Hub"
+        Height="280"
+        Width="420"
+        Topmost="True"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E1E">
+
+    <Grid Margin="15">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Barcode Hub"
+                   Foreground="White"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Margin="0,0,0,10"/>
+
+        <TextBox x:Name="BarcodeBox"
+         Grid.Row="1"
+         Height="40"
+         FontSize="18"
+         VerticalContentAlignment="Center"
+         KeyDown="BarcodeBox_KeyDown"/>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Margin="0,10,0,10">
+
+            <Button x:Name="BtnWindow1"
+                    Width="170"
+                    Height="40"
+                    Content="ScanHelper"
+                    Click="BtnWindow1_Click"/>
+
+            <Button x:Name="BtnWindow2"
+                    Width="170"
+                    Height="40"
+                    Margin="10,0,0,0"
+                    Content="Torgsoft"
+                    Click="BtnWindow2_Click"/>
+            
+
+        </StackPanel>
+
+        <TextBlock x:Name="StatusText"
+                   Grid.Row="3"
+                   Foreground="White"
+                   FontSize="14"
+                   Text="Готово"/>
+
+    </Grid>
+</Window>

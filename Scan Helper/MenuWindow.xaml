@@ -1,0 +1,157 @@
+﻿<Window x:Class="ScanHelper.MenuWindow"
+        Icon="/Assets/Icons/app.ico"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Scan Helper"
+        Height="660"
+        Width="1100"
+        MinHeight="580"
+        MinWidth="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#000000"
+        ResizeMode="CanResize"
+        WindowState="Normal">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ЛЕВОЕ МЕНЮ (без змін) -->
+        <Border Grid.Column="0"
+                Background="#191919"
+                BorderBrush="#2A2A2A"
+                BorderThickness="0,0,1,0">
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+
+                <StackPanel Margin="14,16,14,16">
+
+                    <TextBlock Text="Scan Helper"
+                               Foreground="White"
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Margin="8,8,8,20"/>
+
+                    <Button Height="48" Margin="0,0,0,10" Content="Перерахунок сканером" Click="ScanCount_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Пломбування товару" Click="Seal_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Імітатор НВП" Click="Simulator_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Перевірка 4-5 каб" Click="DatabaseCheck_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Аналіз Стану Складу" Click="Analysis_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Прив’язки Офіс → Інстаграм" Click="OfficeInstagram_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Печать сканером" Click="PrintLabels_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Друк по стану складу" Click="StockPrint_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Barcode Hub TS-SH" Click="BarcodeHub_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Barcode Hub SH-SH" Click="ScanHelperHub_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Barcode Voice Hub" Click="VoiceHub_Click"/>
+                    <Button Height="48" Margin="0,0,0,10" Content="Голосовий помічник" Click="VoiceAssistant_Click"/>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- ПРАВАЯ ОБЛАСТЬ (зменшені відступи) -->
+        <Grid Grid.Column="1" Background="#000000" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Верх -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <TextBlock Text="Інструкція з користування програмою"
+                           Foreground="White"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           TextWrapping="Wrap"/>
+
+                <TextBlock Text="Опис функціоналу програми, порядок роботи з модулями та швидкий доступ до інструкції."
+                           Foreground="#B7B7B7"
+                           FontSize="15"
+                           Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
+
+                <Button Content="Відкрити інструкцію"
+                        Width="200"
+                        Height="44"
+                        Margin="0,16,0,0"
+                        HorizontalAlignment="Left"
+                        Click="OpenInstruction_Click"/>
+            </StackPanel>
+
+            <!-- Низ (збільшена права колонка) -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.0*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                    <!-- збільшено частку картинки -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Ліва текстова частина -->
+                <StackPanel Grid.Column="0"
+                            Margin="0,8,20,0"
+                            VerticalAlignment="Top">
+
+                    <TextBlock Text="Що є в програмі"
+                               Foreground="#12CFFF"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,16"/>
+
+                    <TextBlock Text="• Перерахунок товару сканером"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="• Друк етикеток і автодрук"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="• Barcode Hub / Barcode Voice"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="• Аналіз стану складу"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="• Інструменти для роботи з TS та сайтом"
+                               Foreground="White"
+                               FontSize="16"
+                               Margin="0,0,0,12"/>
+
+                    <Border Background="#181818"
+                            CornerRadius="14"
+                            Padding="16"
+                            Margin="0,20,0,0"
+                            BorderBrush="#252525"
+                            BorderThickness="1">
+                        <TextBlock Text="Якщо програма працює некоректно або потрібно щось доробити — звертайся до розробника (Albert)."
+                                   Foreground="#C9C9C9"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"/>
+                        
+                    </Border>
+                </StackPanel>
+
+                <!-- Права частина – картинка (збільшена за рахунок колонки) -->
+                <Grid Grid.Column="1"
+                      Background="#000000"
+                      ClipToBounds="True" Margin="0,-51,0,0">
+
+                    <Image Source="/Assets/scanner_art.png"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           SnapsToDevicePixels="True"
+                           RenderOptions.BitmapScalingMode="HighQuality" Height="787" Margin="6,0,0,0" Width="532"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+	</PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+	  <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>Scan_Helper</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+	  <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+	
+
+  <ItemGroup>
+    <None Remove="Assets\error.mp3" />
+    <None Remove="Assets\Icons\app.ico" />
+    <None Remove="Assets\scanner_art.png" />
+    <None Remove="Assets\бажане.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\error.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
+    <PackageReference Include="EdgeTTS" Version="1.0.3" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
+	<PackageReference Include="Microsoft.Web.WebView2.DevToolsProtocolExtension" Version="1.0.2901" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="squirrel.windows" Version="2.0.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.9" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.8" />
+    <PackageReference Include="System.Speech" Version="10.0.9" />
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Icons\app.ico" />
+    <Resource Include="Assets\scanner_art.png" />
+    <Resource Include="Assets\бажане.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,114 @@
+﻿<Window x:Class="ScanHelper.AutoPrintWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Автодрук ТоргСофт"
+        Height="500"
+        Width="600"
+        Topmost="True">
+
+    <Grid Margin="15">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Автодрук ТоргСофт"
+               FontSize="22"
+               FontWeight="Bold"
+               VerticalAlignment="Center"/>
+
+            <TextBlock x:Name="ProgressText"
+               Grid.Column="1"
+               FontSize="16"
+               FontWeight="Bold"
+               Foreground="DarkGreen"
+               VerticalAlignment="Center"
+               Text="0 / 0"/>
+        </Grid>
+
+        <StackPanel Grid.Row="1">
+
+            <Button x:Name="BtnToggleSettings"
+            Height="35"
+            Margin="0,0,0,10"
+            Content="⚙ Налаштування ▼"
+            Click="BtnToggleSettings_Click"/>
+
+            <StackPanel x:Name="SettingsPanel">
+
+                <Button x:Name="BtnSearch"
+            Height="35"
+            Margin="0,5"
+            Content="1. Записати Пошук"
+            Click="BtnSearch_Click"/>
+
+            <Button x:Name="BtnProduct"
+            Height="35"
+            Margin="0,5"
+            Content="2. Записати Товар"
+            Click="BtnProduct_Click"/>
+
+            <Button x:Name="BtnPrinter"
+            Height="35"
+            Margin="0,5"
+            Content="3. Записати Принтер"
+            Click="BtnPrinter_Click"/>
+
+            <Button x:Name="BtnPrintSingle"
+            Height="35"
+            Margin="0,5"
+            Content="4. Записати Друк поштучно"
+            Click="BtnPrintSingle_Click"/>
+
+            <Button x:Name="BtnPrint"
+            Height="35"
+            Margin="0,5"
+            Content="5. Записати кнопку Друк"
+            Click="BtnPrint_Click"/>
+
+            <Button x:Name="BtnClose"
+            Height="35"
+            Margin="0,5"
+            Content="6. Записати Закрити"
+            Click="BtnClose_Click"/>
+            </StackPanel>
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+            Orientation="Horizontal"
+            Margin="0,15,0,15">
+
+            <Button Width="120"
+        Height="40"
+        Margin="10,0,0,0"
+        Content="Зберегти"
+        Click="BtnSave_Click"/>
+
+            <Button Width="120"
+            Height="40"
+            Margin="10,0,0,0"
+            Content="Старт"
+            Click="BtnStart_Click"/>
+            <Button Width="120"
+        Height="40"
+        Margin="10,0,0,0"
+        Content="Скинути"
+        Click="BtnReset_Click"/>
+
+        </StackPanel>
+
+        <ListBox x:Name="LogBox"
+                 Grid.Row="3"/>
+
+    </Grid>
+</Window>

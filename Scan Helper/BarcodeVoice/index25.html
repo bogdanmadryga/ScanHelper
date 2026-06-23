@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Voice – з місцем зберігання</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#121212; color:white; font-family:'Segoe UI',sans-serif; min-height:100vh; padding:25px; }
+        .container { max-width:1200px; margin:auto; }
+
+        .top-bar {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .mode-selector {
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+        .mode-selector label {
+            font-size:18px;
+            font-weight:bold;
+            color:#00D4FF;
+        }
+        #modeSelect {
+            background:#1E1E1E;
+            color:white;
+            border:2px solid #00D4FF;
+            border-radius:12px;
+            padding:10px 20px;
+            font-size:18px;
+            cursor:pointer;
+            outline:none;
+        }
+        #modeSelect option {
+            background:#1E1E1E;
+            color:white;
+        }
+        .mode-display {
+            font-size:18px;
+            color:#aaa;
+            background:#1E1E1E;
+            padding:10px 20px;
+            border-radius:10px;
+        }
+        .mode-display span { color:#00FF88; font-weight:bold; }
+
+        .title { text-align:center; margin-bottom:25px; }
+        .title h1 { color:#00D4FF; font-size:48px; }
+        .title p { color:#999; margin-top:5px; font-size:18px; }
+
+        .top { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .card { background:#1E1E1E; border-radius:20px; padding:20px; }
+        .card h2 { margin-bottom:15px; }
+        .file-btn { display:inline-block; background:#00D4FF; color:black; padding:12px 20px; border-radius:10px; cursor:pointer; font-weight:bold; }
+        input[type="file"] { display:none; }
+        #barcode { width:100%; height:65px; margin-top:15px; border:none; border-radius:10px; background:#111; color:white; font-size:28px; padding-left:15px; }
+        .price { text-align:center; }
+        .price-value {
+            font-size:110px;
+            color:#00FF88;
+            font-weight:bold;
+        }
+        .zone-value {
+            font-size:110px;
+            color:#FFD700;
+            font-weight:bold;
+        }
+        .location-value {
+            font-size:36px;
+            color:#00D4FF;
+            font-weight:bold;
+            margin-top:10px;
+            background:#1E1E1E;
+            padding:10px;
+            border-radius:10px;
+            display:inline-block;
+        }
+        .status { margin-top:15px; font-size:18px; }
+        .stats { margin-top:20px; display:flex; justify-content:space-between; color:#aaa; flex-wrap:wrap; gap:10px; }
+        .history { margin-top:25px; background:#1E1E1E; border-radius:20px; padding:20px; }
+        .history h2 { margin-bottom:15px; }
+        #historyList { max-height:300px; overflow:auto; }
+        .item { padding:10px; border-bottom:1px solid #333; }
+
+        .controls {
+            background:#1E1E1E;
+            border-radius:20px;
+            padding:20px;
+            margin-top:20px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:30px;
+            align-items:center;
+        }
+        .control-group {
+            display:flex;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap;
+        }
+        .control-group label {
+            font-size:18px;
+            font-weight:bold;
+            color:#00D4FF;
+            min-width:70px;
+        }
+        .control-group input[type="range"] {
+            width:180px;
+            height:6px;
+            -webkit-appearance:none;
+            background:#333;
+            border-radius:3px;
+            outline:none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance:none;
+            width:18px;
+            height:18px;
+            background:#00D4FF;
+            border-radius:50%;
+            cursor:pointer;
+        }
+        .control-value {
+            font-size:22px;
+            font-weight:bold;
+            color:#00FF88;
+            min-width:50px;
+            text-align:center;
+        }
+        .speed-btn {
+            background:#00D4FF;
+            color:#000;
+            border:none;
+            border-radius:8px;
+            padding:6px 14px;
+            font-size:20px;
+            font-weight:bold;
+            cursor:pointer;
+        }
+        .speed-btn:active { opacity:0.7; }
+
+        .lang-select {
+            background:#333;
+            color:white;
+            border:none;
+            border-radius:10px;
+            padding:8px 16px;
+            font-size:18px;
+            cursor:pointer;
+        }
+        .lang-select option { background:#1E1E1E; }
+
+        .checkbox-group {
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width:20px;
+            height:20px;
+            accent-color:#00D4FF;
+        }
+        .checkbox-group label {
+            font-size:18px;
+            color:#aaa;
+            cursor:pointer;
+        }
+        .hidden { display:none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+        <div class="mode-selector">
+            <label for="modeSelect">Режими роботи:</label>
+            <select id="modeSelect">
+                <option value="0">Озвучка ціни та місць</option>
+                <option value="1">Рознесення ФОП</option>
+                <option value="2">Рознесення ТОВ</option>
+            </select>
+        </div>
+        <div class="mode-display">Поточний режим: <span id="currentMode">Озвучка ціни та місць</span></div>
+    </div>
+
+    <div class="title">
+        <h1>BARCODE VOICE</h1>
+        <p id="subtitle">Озвучування цін і місць зберігання</p>
+    </div>
+
+    <div class="top">
+        <div class="card">
+            <h2>Excel</h2>
+            <label class="file-btn">
+                Завантажити Excel
+                <input type="file" id="excelFile" accept=".xlsx,.xls">
+            </label>
+            <div class="status" id="status">Очікування Excel...</div>
+            <input id="barcode" placeholder="Скануйте штрихкод" autofocus>
+        </div>
+        <div class="card price">
+            <h2 id="priceTitle">Ціна</h2>
+            <div id="priceDisplay">
+                <div class="price-value" id="price">-</div>
+            </div>
+            <div id="zoneDisplay" class="hidden">
+                <div class="zone-value" id="zone">-</div>
+            </div>
+            <div style="margin-top:15px; font-size:20px; color:#aaa;">Місце зберігання:</div>
+            <div class="location-value" id="location">-</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Швидкість</label>
+            <button class="speed-btn" id="speedDown">–</button>
+            <input type="range" id="speedSlider" min="0.5" max="10" step="0.5" value="5">
+            <button class="speed-btn" id="speedUp">+</button>
+            <span class="control-value" id="speedDisplay">5.0</span>
+        </div>
+
+        <div class="control-group">
+            <label>Гучність</label>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+            <span class="control-value" id="volumeDisplay">1.0</span>
+        </div>
+
+        <div class="control-group">
+            <label>Мова</label>
+            <select class="lang-select" id="langSelect">
+                <option value="uk" selected>Українська</option>
+                <option value="ru">Російська</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
+        <div class="control-group checkbox-group" id="speakLocationGroup">
+            <input type="checkbox" id="speakLocation">
+            <label for="speakLocation">Озвучувати місце зберігання</label>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div>Товарів: <span id="count">0</span></div>
+        <div>Останній код: <span id="lastBarcode">-</span></div>
+    </div>
+
+    <div class="history">
+        <h2>Історія</h2>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+    // ===== Глобальні змінні для даних =====
+    let barcodeMapPrice0 = new Map();
+    let barcodeMapLocation0 = new Map();
+    let barcodeMapPrice1 = new Map();
+    let barcodeMapLocation1 = new Map();
+    let barcodeMapPrice2 = new Map();
+    let barcodeMapLocation2 = new Map();
+
+    let currentPriceMap = barcodeMapPrice0;
+    let currentLocationMap = barcodeMapLocation0;
+
+    const barcodeInput = document.getElementById('barcode');
+    const historyList = document.getElementById('historyList');
+    const excelFileInput = document.getElementById('excelFile');
+
+    const speedSlider = document.getElementById('speedSlider');
+    const speedDisplay = document.getElementById('speedDisplay');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeDisplay = document.getElementById('volumeDisplay');
+    const langSelect = document.getElementById('langSelect');
+    const speedUp = document.getElementById('speedUp');
+    const speedDown = document.getElementById('speedDown');
+    const modeSelect = document.getElementById('modeSelect');
+    const currentModeSpan = document.getElementById('currentMode');
+    const speakLocationCheck = document.getElementById('speakLocation');
+    const speakLocationGroup = document.getElementById('speakLocationGroup');
+    const priceTitle = document.getElementById('priceTitle');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const zoneDisplay = document.getElementById('zoneDisplay');
+    const priceEl = document.getElementById('price');
+    const zoneEl = document.getElementById('zone');
+    const locationEl = document.getElementById('location');
+    const statusEl = document.getElementById('status');
+    const subtitleEl = document.getElementById('subtitle');
+    const countEl = document.getElementById('count');
+
+    let selectedVoice = null;
+    const modeNames = ['Озвучка ціни та місць', 'Рознесення ФОП', 'Рознесення ТОВ'];
+    const subtitles = [
+        'Озвучування цін і місць зберігання',
+        'Озвучування зон',
+        'Озвучування зон'
+    ];
+
+    let speechQueue = [];
+    let isSpeaking = false;
+
+    function ensureFocus() {
+        if (document.activeElement !== barcodeInput) {
+            barcodeInput.focus();
+        }
+    }
+
+    function updateUIForMode(mode) {
+        subtitleEl.textContent = subtitles[mode] || subtitles[0];
+
+        if (mode === 0) {
+            priceTitle.textContent = 'Ціна';
+            priceDisplay.classList.remove('hidden');
+            zoneDisplay.classList.add('hidden');
+            speakLocationGroup.classList.remove('hidden');
+        } else {
+            priceTitle.textContent = 'Зона';
+            priceDisplay.classList.add('hidden');
+            zoneDisplay.classList.remove('hidden');
+            speakLocationGroup.classList.add('hidden');
+        }
+
+        if (mode === 0) {
+            currentPriceMap = barcodeMapPrice0;
+            currentLocationMap = barcodeMapLocation0;
+        } else if (mode === 1) {
+            currentPriceMap = barcodeMapPrice1;
+            currentLocationMap = barcodeMapLocation1;
+        } else if (mode === 2) {
+            currentPriceMap = barcodeMapPrice2;
+            currentLocationMap = barcodeMapLocation2;
+        }
+
+        countEl.innerText = currentPriceMap.size;
+
+        if (mode === 0) {
+            priceEl.textContent = '-';
+            locationEl.textContent = '-';
+        } else {
+            zoneEl.textContent = '-';
+            locationEl.textContent = '-';
+        }
+
+        const size = currentPriceMap.size;
+        if (size > 0) {
+            statusEl.innerText = `Excel завантажено (${size} товарів) для режиму "${modeNames[mode]}"`;
+        } else {
+            statusEl.innerText = `Очікування Excel для режиму "${modeNames[mode]}"...`;
+        }
+    }
+
+    function updateSpeedDisplay() {
+        const val = parseFloat(speedSlider.value);
+        speedDisplay.textContent = val.toFixed(1);
+        ensureFocus();
+    }
+    function updateVolumeDisplay() {
+        const val = parseFloat(volumeSlider.value);
+        volumeDisplay.textContent = val.toFixed(1);
+        ensureFocus();
+    }
+
+    speedSlider.addEventListener('input', updateSpeedDisplay);
+    volumeSlider.addEventListener('input', updateVolumeDisplay);
+
+    speedUp.addEventListener('click', () => {
+        let val = parseFloat(speedSlider.value) + 0.5;
+        if (val > 10) val = 10;
+        speedSlider.value = val;
+        updateSpeedDisplay();
+        ensureFocus();
+    });
+    speedDown.addEventListener('click', () => {
+        let val = parseFloat(speedSlider.value) - 0.5;
+        if (val < 0.5) val = 0.5;
+        speedSlider.value = val;
+        updateSpeedDisplay();
+        ensureFocus();
+    });
+
+    modeSelect.addEventListener('change', function() {
+        const modeIndex = parseInt(this.value);
+        currentModeSpan.textContent = modeNames[modeIndex];
+        console.log('Обрано режим:', modeNames[modeIndex]);
+        updateUIForMode(modeIndex);
+        ensureFocus();
+    });
+
+    excelFileInput.addEventListener('change', loadExcel);
+
+    async function loadExcel(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = '';
+
+        const mode = parseInt(modeSelect.value);
+        console.log('Завантаження Excel для режиму:', mode, 'Файл:', file.name);
+
+        try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            if (mode === 0) {
+                barcodeMapPrice0.clear();
+                barcodeMapLocation0.clear();
+            } else if (mode === 1) {
+                barcodeMapPrice1.clear();
+                barcodeMapLocation1.clear();
+            } else if (mode === 2) {
+                barcodeMapPrice2.clear();
+                barcodeMapLocation2.clear();
+            }
+
+            for (let i = 3; i < rows.length; i++) {
+                const row = rows[i];
+                const barcode = String(row[2] ?? '').trim();
+                const price = String(row[3] ?? '').trim();
+                const location = String(row[7] ?? '').trim();
+
+                if (barcode) {
+                    if (mode === 0) {
+                        barcodeMapPrice0.set(barcode, price);
+                        if (location) barcodeMapLocation0.set(barcode, location);
+                    } else if (mode === 1) {
+                        barcodeMapPrice1.set(barcode, price);
+                        if (location) barcodeMapLocation1.set(barcode, location);
+                    } else if (mode === 2) {
+                        barcodeMapPrice2.set(barcode, price);
+                        if (location) barcodeMapLocation2.set(barcode, location);
+                    }
+                }
+            }
+
+            if (mode === 0) {
+                currentPriceMap = barcodeMapPrice0;
+                currentLocationMap = barcodeMapLocation0;
+            } else if (mode === 1) {
+                currentPriceMap = barcodeMapPrice1;
+                currentLocationMap = barcodeMapLocation1;
+            } else if (mode === 2) {
+                currentPriceMap = barcodeMapPrice2;
+                currentLocationMap = barcodeMapLocation2;
+            }
+
+            countEl.innerText = currentPriceMap.size;
+            statusEl.innerText = `Excel завантажено (${currentPriceMap.size} товарів) для режиму "${modeNames[mode]}"`;
+            console.log('Завантажено товарів:', currentPriceMap.size);
+            barcodeInput.focus();
+        } catch (error) {
+            console.error('Помилка завантаження Excel:', error);
+            statusEl.innerText = 'Помилка завантаження файлу. Перевірте формат.';
+        }
+    }
+
+    // ===== Визначення зони для режиму ФОП (С1, С4, Ш3) =====
+    function determineZoneFOP(address) {
+        if (!address) return null;
+        const lower = address.toLowerCase();
+
+        if (lower.includes('вікно')) return 'Ш3';
+
+        const parts = address.split(/[\s-]+/).filter(p => p.length > 0);
+        if (parts.length === 0) return null;
+
+        const first = parts[0];
+        const second = parts.length > 1 ? parts[1] : '';
+
+        if (/^[A-Za-zА-Яа-я]/.test(first)) {
+            const prefix = first.toUpperCase();
+
+            if (prefix.startsWith('С12')) return 'Ш3';
+            if (prefix.startsWith('С1') || prefix.startsWith('С2') ||
+                prefix.startsWith('С3') || prefix.startsWith('МС4') ||
+                prefix.startsWith('МС3')) {
+                return 'С1';
+            }
+            if (prefix.startsWith('С4')) return 'С4';
+            if (prefix.startsWith('Ш3') || prefix.startsWith('Ш1') ||
+                prefix.startsWith('Ш2') || prefix.startsWith('МС1') ||
+                prefix.startsWith('МС2')) {
+                return 'Ш3';
+            }
+            return null;
+        }
+
+        if (/^\d+$/.test(first)) {
+            const street = parseInt(first, 10);
+            if (street === 9) return 'С1';
+            if (street === 8) {
+                if (second) {
+                    const block = parseInt(second, 10);
+                    if (!isNaN(block)) {
+                        if (block >= 11 && block <= 20) return 'С1';
+                        if (block >= 1 && block <= 10) return 'С4';
+                    }
+                }
+                return null;
+            }
+            if (street === 7 || street === 6 || street === 5) return 'С4';
+            if (street === 4 || street === 3 || street === 2) return 'Ш3';
+            return null;
+        }
+
+        return null;
+    }
+
+    // ===== Визначення зони для режиму ТОВ (4 каб, 5 каб) =====
+    function determineZoneTOV(address) {
+        if (!address) return null;
+        const lower = address.toLowerCase();
+
+        // Шукаємо "4 кабінет" або "4 каб"
+        if (lower.includes('4 кабінет') || lower.includes('4 каб')) {
+            return '4 каб';
+        }
+        if (lower.includes('5 кабінет') || lower.includes('5 каб')) {
+            return '5 каб';
+        }
+
+        const parts = address.split(/[\s-]+/).filter(p => p.length > 0);
+        if (parts.length === 0) return null;
+
+        const first = parts[0];
+
+        // Префікс МС5 – 5 каб
+        if (/^[A-Za-zА-Яа-я]/.test(first)) {
+            const prefix = first.toUpperCase();
+            if (prefix.startsWith('МС5')) return '5 каб';
+            // Якщо інший префікс – не визначаємо (можна додати інші за потреби)
+            return null;
+        }
+
+        // Якщо перша частина – число (вулиця)
+        if (/^\d+$/.test(first)) {
+            const street = parseInt(first, 10);
+            // 13,14,15,16 – 4 каб
+            if (street === 13 || street === 14 || street === 15 || street === 16) {
+                return '4 каб';
+            }
+            // 10,11,12 – 5 каб
+            if (street === 10 || street === 11 || street === 12) {
+                return '5 каб';
+            }
+            return null;
+        }
+
+        return null;
+    }
+
+    function getFirstValidAddress(locationRaw) {
+        if (!locationRaw || !locationRaw.trim()) return null;
+        const addresses = locationRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        const valid = addresses.filter(addr => !addr.toLowerCase().includes('пломба'));
+        return valid.length > 0 ? valid[0] : null;
+    }
+
+    barcodeInput.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        const code = this.value.trim();
+        if (!code) return;
+
+        document.getElementById('lastBarcode').innerText = code;
+
+        const mode = parseInt(modeSelect.value);
+        let priceMap, locationMap;
+        if (mode === 0) {
+            priceMap = barcodeMapPrice0;
+            locationMap = barcodeMapLocation0;
+        } else if (mode === 1) {
+            priceMap = barcodeMapPrice1;
+            locationMap = barcodeMapLocation1;
+        } else {
+            priceMap = barcodeMapPrice2;
+            locationMap = barcodeMapLocation2;
+        }
+
+        if (priceMap.has(code)) {
+            const price = priceMap.get(code);
+            const locationRaw = locationMap.get(code) || '';
+
+            const hasLocation = locationRaw.trim().length > 0;
+
+            speechQueue = [];
+
+            if (mode === 0) {
+                priceEl.textContent = price;
+                locationEl.textContent = hasLocation ? locationRaw : 'Нема місця';
+                priceDisplay.classList.remove('hidden');
+                zoneDisplay.classList.add('hidden');
+
+                if (!speakLocationCheck.checked) {
+                    addToSpeechQueue(price);
+                } else {
+                    if (hasLocation) {
+                        let speechText = formatLocationForSpeech(locationRaw);
+                        if (!speechText) {
+                            speechText = 'Нема місця';
+                        }
+                        addToSpeechQueue(speechText);
+                    } else {
+                        addToSpeechQueue('Нема місця');
+                    }
+                }
+            } else {
+                priceDisplay.classList.add('hidden');
+                zoneDisplay.classList.remove('hidden');
+                locationEl.textContent = hasLocation ? locationRaw : 'Нема місця';
+
+                let zoneText = '—';
+                if (hasLocation) {
+                    const firstAddr = getFirstValidAddress(locationRaw);
+                    if (firstAddr) {
+                        let zone = null;
+                        if (mode === 1) {
+                            zone = determineZoneFOP(firstAddr);
+                        } else if (mode === 2) {
+                            zone = determineZoneTOV(firstAddr);
+                        }
+                        if (zone) {
+                            zoneText = zone;
+                            addToSpeechQueue(zone);
+                        }
+                    }
+                }
+                zoneEl.textContent = zoneText;
+            }
+
+            processQueue();
+
+            addHistory(code, price, hasLocation ? locationRaw : 'Нема місця', mode, zoneEl.textContent);
+            document.getElementById('status').innerText = 'Товар знайдено';
+        } else {
+            priceEl.textContent = '0';
+            locationEl.textContent = '—';
+            speechQueue = [];
+            addToSpeechQueue('Не знайдено');
+            processQueue();
+            document.getElementById('status').innerText = 'Штрихкод не знайдено';
+        }
+
+        this.value = '';
+        ensureFocus();
+    });
+
+    function addToSpeechQueue(text) {
+        if (text && text.trim()) {
+            speechQueue.push(text.trim());
+        }
+    }
+
+    function processQueue() {
+        if (isSpeaking || speechQueue.length === 0) return;
+        isSpeaking = true;
+        const text = speechQueue.shift();
+        speakInternal(text, () => {
+            isSpeaking = false;
+            processQueue();
+        });
+    }
+
+    function speakInternal(text, callback) {
+        if (!text) {
+            if (callback) callback();
+            return;
+        }
+
+        const utter = new SpeechSynthesisUtterance(String(text));
+
+        const lang = langSelect.value;
+        const newVoice = selectVoiceByLang(lang);
+        if (newVoice) {
+            utter.voice = newVoice;
+            selectedVoice = newVoice;
+            console.log('Голос:', newVoice.name, 'Мова:', newVoice.lang);
+        }
+
+        utter.rate = parseFloat(speedSlider.value);
+        utter.volume = parseFloat(volumeSlider.value);
+        utter.pitch = 1.2;
+
+        if (lang === 'uk') utter.lang = 'uk-UA';
+        else if (lang === 'ru') utter.lang = 'ru-RU';
+        else utter.lang = 'en-US';
+
+        utter.onend = function() {
+            if (callback) callback();
+        };
+
+        utter.onerror = function() {
+            if (callback) callback();
+        };
+
+        speechSynthesis.speak(utter);
+    }
+
+    function addHistory(barcode, price, location, mode, zone) {
+        const div = document.createElement('div');
+        div.className = 'item';
+        let text = barcode + ' → ';
+        if (mode === 0) {
+            text += price + (location ? ' → ' + location : '');
+        } else {
+            text += 'Зона: ' + zone + (location ? ' → ' + location : '');
+        }
+        div.innerHTML = text;
+        historyList.prepend(div);
+    }
+
+    // ===== Допоміжні функції для озвучування адрес (режим 0) =====
+    function numberToUkrainian(num) {
+        if (num === 0) return 'ноль';
+        const ones = ['', 'один', 'два', 'три', 'чотири', 'п\'ять', 'шість', 'сім', 'вісім', 'дев\'ять'];
+        const teens = ['десять', 'одинадцять', 'дванадцять', 'тринадцять', 'чотирнадцять', 'п\'ятнадцять', 'шістнадцять', 'сімнадцять', 'вісімнадцять', 'дев\'ятнадцять'];
+        const tens = ['', 'десять', 'двадцять', 'тридцять', 'сорок', 'п\'ятдесят', 'шістдесят', 'сімдесят', 'вісімдесят', 'дев\'яносто'];
+
+        if (num < 10) return ones[num];
+        if (num < 20) return teens[num - 10];
+        const ten = Math.floor(num / 10);
+        const one = num % 10;
+        if (one === 0) return tens[ten];
+        return tens[ten] + ' ' + ones[one];
+    }
+
+    function numberToUkrainianOrdinal(num, gender) {
+        if (num < 1 || num > 10) {
+            return numberToUkrainian(num);
+        }
+        const ordinals = {
+            'm': ['', 'перший', 'другий', 'третій', 'четвертий', 'п\'ятий', 'шостий', 'сьомий', 'восьмий', 'дев\'ятий', 'десятий'],
+            'f': ['', 'перша', 'друга', 'третя', 'четверта', 'п\'ята', 'шоста', 'сьома', 'восьма', 'дев\'ята', 'десята'],
+            'n': ['', 'перше', 'друге', 'третє', 'четверте', 'п\'яте', 'шосте', 'сьоме', 'восьме', 'дев\'яте', 'десяте']
+        };
+        return ordinals[gender][num];
+    }
+
+    function convertToNaturalSpeech(part) {
+        const lower = part.toLowerCase().trim();
+        if (!lower) return null;
+
+        const wordMap = {
+            'вікно': { gender: 'n', word: 'вікно' },
+            'рівень': { gender: 'm', word: 'рівень' },
+            'стелаж': { gender: 'm', word: 'стелаж' },
+            'шафа': { gender: 'f', word: 'шафа' },
+            'ящик': { gender: 'm', word: 'ящик' },
+            'комната': { gender: 'f', word: 'комната' },
+            'серверна': { gender: 'f', word: 'серверна' }
+        };
+
+        for (const [kw, info] of Object.entries(wordMap)) {
+            if (lower.includes(kw)) {
+                let match = part.match(new RegExp(`(\\d+)\\s*${kw}`, 'i'));
+                if (!match) {
+                    match = part.match(new RegExp(`${kw}\\s*(\\d+)`, 'i'));
+                }
+                if (match) {
+                    const num = parseInt(match[1], 10);
+                    const ordinal = numberToUkrainianOrdinal(num, info.gender);
+                    return ordinal + ' ' + info.word;
+                } else {
+                    return part;
+                }
+            }
+        }
+
+        const levelMatch = part.match(/(\d+)-?й?\s*рівень/i);
+        if (levelMatch) {
+            const num = parseInt(levelMatch[1], 10);
+            const ordinal = numberToUkrainianOrdinal(num, 'm');
+            return ordinal + ' рівень';
+        }
+
+        return null;
+    }
+
+    function tokenToSpeech(token) {
+        if (!token) return '';
+
+        if (/^\d+$/.test(token)) {
+            if (/^0+$/.test(token)) {
+                let zeros = '';
+                for (let i = 0; i < token.length; i++) {
+                    zeros += 'ноль ';
+                }
+                return zeros.trim();
+            } else {
+                const num = parseInt(token, 10);
+                return numberToUkrainian(num);
+            }
+        }
+
+        if (/^[A-Za-zА-Яа-я]+$/.test(token)) {
+            return token;
+        }
+
+        let result = '';
+        for (let ch of token) {
+            if (ch >= '0' && ch <= '9') {
+                result += digitToUkrainian(ch) + ' ';
+            } else {
+                result += letterToUkrainian(ch) + ' ';
+            }
+        }
+        return result.trim();
+    }
+
+    function formatLocationForSpeech(location) {
+        if (!location || !location.trim()) return '';
+
+        const addresses = location.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        const filtered = addresses.filter(addr => !addr.toLowerCase().includes('пломба'));
+
+        if (filtered.length === 0) return '';
+
+        const spokenAddresses = filtered.map(addr => {
+            const natural = convertToNaturalSpeech(addr);
+            if (natural) return natural;
+
+            const tokens = addr.split(/[\s,;-]+/).filter(t => t.length > 0);
+            return tokens.map(tokenToSpeech).join(' ');
+        });
+
+        return spokenAddresses.join(' , ');
+    }
+
+    function digitToUkrainian(digit) {
+        const map = {
+            '0': 'ноль', '1': 'один', '2': 'два', '3': 'три', '4': 'чотири',
+            '5': 'п\'ять', '6': 'шість', '7': 'сім', '8': 'вісім', '9': 'дев\'ять'
+        };
+        return map[digit] || digit;
+    }
+
+    function letterToUkrainian(letter) {
+        const map = {
+            'A': 'а', 'B': 'бе', 'C': 'це', 'D': 'де', 'E': 'е', 'F': 'еф',
+            'G': 'ге', 'H': 'ха', 'I': 'і', 'J': 'йот', 'K': 'ка', 'L': 'ел',
+            'M': 'ем', 'N': 'ен', 'O': 'о', 'P': 'пе', 'Q': 'ку', 'R': 'ер',
+            'S': 'ес', 'T': 'те', 'U': 'у', 'V': 'ве', 'W': 'дубль-ве',
+            'X': 'ікс', 'Y': 'ігрек', 'Z': 'зет',
+            'А': 'а', 'Б': 'бе', 'В': 'ве', 'Г': 'ге', 'Ґ': 'ґе',
+            'Д': 'де', 'Е': 'е', 'Є': 'є', 'Ж': 'же', 'З': 'зе',
+            'И': 'и', 'І': 'і', 'Ї': 'ї', 'Й': 'йот', 'К': 'ка',
+            'Л': 'ел', 'М': 'ем', 'Н': 'ен', 'О': 'о', 'П': 'пе',
+            'Р': 'ер', 'С': 'ес', 'Т': 'те', 'У': 'у', 'Ф': 'еф',
+            'Х': 'ха', 'Ц': 'це', 'Ч': 'че', 'Ш': 'ша', 'Щ': 'ща',
+            'Ь': 'ь', 'Ю': 'ю', 'Я': 'я'
+        };
+        return map[letter.toUpperCase()] || letter;
+    }
+
+    function selectVoiceByLang(lang) {
+        const voices = speechSynthesis.getVoices();
+        if (!voices || voices.length === 0) return null;
+
+        if (lang === 'uk') {
+            const preferred = voices.find(v => v.name && (v.name.includes('Ostap') || v.name.includes('Polina')));
+            if (preferred) return preferred;
+        }
+
+        const langMap = {
+            'uk': ['Ukrainian', 'Natalia', 'Yuri', 'Google українська', 'Google Українська', 'Microsoft Natalia', 'Microsoft Ostap', 'Microsoft Polina'],
+            'ru': ['Russian', 'Irina', 'Yuri', 'Google русский', 'Microsoft Irina'],
+            'en': ['Google UK English Female', 'Google US English', 'Samantha', 'Microsoft Zira', 'Alex']
+        };
+
+        const keywords = langMap[lang] || langMap['en'];
+
+        let voice = voices.find(v => v.lang && v.lang.startsWith(lang));
+        if (voice) return voice;
+
+        for (const kw of keywords) {
+            const found = voices.find(v => v.name && v.name.includes(kw));
+            if (found) return found;
+        }
+
+        return voices.find(v => v.lang && v.lang.startsWith(lang)) || voices[0];
+    }
+
+    function initVoices() {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            selectedVoice = selectVoiceByLang(langSelect.value);
+            console.log('Початковий голос:', selectedVoice ? selectedVoice.name : 'не знайдено');
+        } else {
+            speechSynthesis.onvoiceschanged = function() {
+                selectedVoice = selectVoiceByLang(langSelect.value);
+                console.log('Голоси завантажено, обрано:', selectedVoice ? selectedVoice.name : 'не знайдено');
+                speechSynthesis.onvoiceschanged = null;
+            };
+        }
+    }
+
+    langSelect.addEventListener('change', function() {
+        const newVoice = selectVoiceByLang(this.value);
+        if (newVoice) selectedVoice = newVoice;
+        ensureFocus();
+    });
+
+    document.querySelectorAll('.controls input, .controls select, .controls button').forEach(el => {
+        el.addEventListener('click', ensureFocus);
+        el.addEventListener('change', ensureFocus);
+        el.addEventListener('input', ensureFocus);
+    });
+
+    window.onload = function() {
+        initVoices();
+        speedSlider.value = 5;
+        volumeSlider.value = 1;
+        updateSpeedDisplay();
+        updateVolumeDisplay();
+        langSelect.value = 'uk';
+        modeSelect.value = '0';
+        currentModeSpan.textContent = modeNames[0];
+        updateUIForMode(0);
+        barcodeInput.focus();
+    };
+</script>
+</body>
+</html>

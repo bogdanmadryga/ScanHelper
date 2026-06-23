@@ -1,0 +1,119 @@
+﻿<Window x:Class="ScanHelper.NVPManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Менеджер НВП" Height="650" Width="1100"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ЛЕВОЕ МЕНЮ -->
+        <!-- ВАЖНО: Padding у StackPanel нет, поэтому используем Border -->
+        <Border Grid.Column="0" Background="#2A2A2A" Padding="18">
+            <StackPanel>
+                <TextBlock Text="Менеджер НВП" FontSize="26" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
+
+                <Button Content="Создать НВП" Height="46" Margin="0,0,0,12"
+                        Click="CreateNVPMenu_Click"/>
+
+                <Button Content="Посмотреть все НВП" Height="46" Margin="0,0,0,12"
+                        Click="ViewAllMenu_Click"/>
+
+                <Button Content="Назад в меню" Height="46" Margin="0,30,0,0"
+                        Click="Back_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ПРАВАЯ ЧАСТЬ -->
+        <Grid Grid.Column="1" Background="#1F1F1F">
+            <!-- Панель "Создать" -->
+            <Grid x:Name="CreatePanel" Visibility="Visible" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Создать НВП" FontSize="22" FontWeight="Bold" Foreground="White" Margin="0,0,0,14"/>
+
+                <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,12">
+                    <TextBlock Text="Название НВП" Foreground="White"/>
+                    <TextBox x:Name="NVPNameBox" Height="30" Margin="0,6,0,12"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Width="320">
+                            <TextBlock Text="Штрихкод" Foreground="White"/>
+                            <TextBox x:Name="BarcodeBox" Height="30" Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Width="140" Margin="12,0,0,0">
+                            <TextBlock Text="Количество (план)" Foreground="White"/>
+                            <TextBox x:Name="CountBox" Height="30" Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                        <Button Content="Добавить" Width="140" Height="30" Margin="12,24,0,0"
+                                Click="AddItem_Click"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <DataGrid x:Name="ItemsGrid"
+                          Grid.Row="2"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          HeadersVisibility="Column"
+                          IsReadOnly="True"
+                          Margin="0,0,0,12"
+                          Background="White"
+                          Foreground="Black"
+                          RowBackground="White"
+                          AlternatingRowBackground="#F1F1F1">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Штрихкод" Binding="{Binding Barcode}" Width="*"/>
+                        <DataGridTextColumn Header="План" Binding="{Binding ExpectedCount}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="Сохранить НВП" Width="160" Height="38" Click="SaveNVP_Click"/>
+                    <Button Content="Обнулить" Width="120" Height="38" Margin="10,0,0,0" Click="Clear_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Панель "Все НВП" -->
+            <Grid x:Name="ViewAllPanel" Visibility="Collapsed" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Все НВП" FontSize="22" FontWeight="Bold" Foreground="White" Margin="0,0,0,14"/>
+
+                <ListBox x:Name="NVPList"
+                         Grid.Row="1"
+                         DisplayMemberPath="Name"
+                         Background="White"
+                         Foreground="Black"
+                         FontSize="16"/>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Открыть" Width="140" Height="38" Click="OpenSelected_Click"/>
+                    <Button Content="Редактировать" Width="160" Height="38" Margin="10,0,0,0" Click="EditSelected_Click"/>
+                    <Button Content="Удалить" Width="140" Height="38" Margin="10,0,0,0" Click="DeleteSelected_Click"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
+
+
+
+
+
+
+
+
